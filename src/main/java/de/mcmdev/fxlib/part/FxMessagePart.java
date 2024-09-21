@@ -25,35 +25,36 @@
 
 package de.mcmdev.fxlib.part;
 
-import de.mcmdev.fxlib.audience.FxAudience;
+import de.mcmdev.fxlib.context.FxDeserializationContext;
+import de.mcmdev.fxlib.context.FxRuntimeContext;
+import de.mcmdev.fxlib.settings.FxSettings;
 import de.mcmdev.fxlib.serializer.ComponentSerializer;
 import de.mcmdev.fxlib.serializer.FxPartSerializer;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 
-public class FxMessagePart extends FxPart {
+public class FxMessagePart extends PreparedFxPart {
 
     private final Component message;
 
-    public FxMessagePart(FxAudience audience, Component message) {
+    public FxMessagePart(FxSettings audience, Component message) {
         super(audience);
         this.message = message;
     }
 
     @Override
-    protected void play(Player target, Location location) {
+    protected void play(Player target, FxRuntimeContext context, FxSettings settings) {
         target.sendMessage(message);
     }
 
     public static class Serializer extends FxPartSerializer<FxMessagePart> {
 
         @Override
-        public FxMessagePart deserialize(ConfigurationNode node, FxAudience audience) throws SerializationException {
-            Component component = ComponentSerializer.INSTANCE.deserialize(node.node("message"));
-            return new FxMessagePart(audience, component);
+        public FxMessagePart deserialize(ConfigurationNode node, FxDeserializationContext deserializationContext, FxSettings settings) throws SerializationException {
+            Component component = ComponentSerializer.INSTANCE.deserialize(node.node("message"), deserializationContext.getTagResolver());
+            return new FxMessagePart(settings, component);
         }
     }
 }

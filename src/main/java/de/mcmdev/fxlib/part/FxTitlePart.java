@@ -25,24 +25,25 @@
 
 package de.mcmdev.fxlib.part;
 
-import de.mcmdev.fxlib.audience.FxAudience;
+import de.mcmdev.fxlib.context.FxDeserializationContext;
+import de.mcmdev.fxlib.context.FxRuntimeContext;
+import de.mcmdev.fxlib.settings.FxSettings;
 import de.mcmdev.fxlib.serializer.ComponentSerializer;
 import de.mcmdev.fxlib.serializer.FxPartSerializer;
 import de.mcmdev.fxlib.serializer.TitleTimesSerializer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 
-public class FxTitlePart extends FxPart {
+public class FxTitlePart extends PreparedFxPart {
 
     private final Component title;
     private final Component subtitle;
     private final Title.Times times;
 
-    public FxTitlePart(FxAudience audience, Component title, Component subtitle, Title.Times times) {
+    public FxTitlePart(FxSettings audience, Component title, Component subtitle, Title.Times times) {
         super(audience);
         this.title = title;
         this.subtitle = subtitle;
@@ -50,18 +51,18 @@ public class FxTitlePart extends FxPart {
     }
 
     @Override
-    public void play(Player player, Location location) {
-        player.showTitle(Title.title(title, subtitle, times));
+    public void play(Player target, FxRuntimeContext context, FxSettings settings) {
+        target.showTitle(Title.title(title, subtitle, times));
     }
 
     public static class Serializer extends FxPartSerializer<FxTitlePart> {
 
         @Override
-        public FxTitlePart deserialize(ConfigurationNode node, FxAudience audience) throws SerializationException {
-            Component component = ComponentSerializer.INSTANCE.deserialize(node.node("title"));
-            Component subtitle = ComponentSerializer.INSTANCE.deserialize(node.node("subtitle"));
+        public FxTitlePart deserialize(ConfigurationNode node, FxDeserializationContext deserializationContext, FxSettings settings) throws SerializationException {
+            Component component = ComponentSerializer.INSTANCE.deserialize(node.node("title"), deserializationContext.getTagResolver());
+            Component subtitle = ComponentSerializer.INSTANCE.deserialize(node.node("subtitle"), deserializationContext.getTagResolver());
             Title.Times times = TitleTimesSerializer.INSTANCE.deserialize(node.node("times"));
-            return new FxTitlePart(audience, component, subtitle, times);
+            return new FxTitlePart(settings, component, subtitle, times);
         }
     }
 }

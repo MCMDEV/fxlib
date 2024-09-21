@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "de.mcmdev"
-version = "1.0"
+version = "2.0"
 
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(21)

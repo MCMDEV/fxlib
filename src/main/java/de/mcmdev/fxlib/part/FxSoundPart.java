@@ -25,34 +25,35 @@
 
 package de.mcmdev.fxlib.part;
 
-import de.mcmdev.fxlib.audience.FxAudience;
+import de.mcmdev.fxlib.context.FxDeserializationContext;
+import de.mcmdev.fxlib.context.FxRuntimeContext;
+import de.mcmdev.fxlib.settings.FxSettings;
 import de.mcmdev.fxlib.serializer.FxPartSerializer;
 import de.mcmdev.fxlib.serializer.SoundSerializer;
 import net.kyori.adventure.sound.Sound;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 
-public class FxSoundPart extends FxPart {
+public class FxSoundPart extends PreparedFxPart {
 
     private final Sound sound;
 
-    public FxSoundPart(FxAudience audience, Sound sound) {
+    public FxSoundPart(FxSettings audience, Sound sound) {
         super(audience);
         this.sound = sound;
     }
 
     @Override
-    public void play(Player player, Location location) {
-        player.playSound(sound, location.x(), location.y(), location.z());
+    public void play(Player target, FxRuntimeContext context, FxSettings settings) {
+        target.playSound(sound, context.getLocation().x(), context.getLocation().y(), context.getLocation().z());
     }
 
     public static class Serializer extends FxPartSerializer<FxSoundPart> {
 
         @Override
-        public FxSoundPart deserialize(ConfigurationNode node, FxAudience audience) throws SerializationException {
-            return new FxSoundPart(audience, SoundSerializer.INSTANCE.deserialize(node));
+        public FxSoundPart deserialize(ConfigurationNode node, FxDeserializationContext deserializationContext, FxSettings settings) throws SerializationException {
+            return new FxSoundPart(settings, SoundSerializer.INSTANCE.deserialize(node));
         }
     }
 }

@@ -25,23 +25,25 @@
 
 package de.mcmdev.fxlib.serializer;
 
-import de.mcmdev.fxlib.audience.FxAudience;
+import de.mcmdev.fxlib.context.FxDeserializationContext;
+import de.mcmdev.fxlib.context.FxRuntimeContext;
+import de.mcmdev.fxlib.settings.FxSettings;
 import de.mcmdev.fxlib.part.FxPart;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 
 public abstract class FxPartSerializer<T extends FxPart> {
 
-    public T deserializeWithDefault(ConfigurationNode node, FxAudience defaultAudience) throws SerializationException {
-        ConfigurationNode audienceNode = node.node("audience");
-        if(audienceNode.virtual()) {
-            if(defaultAudience == null) {
-                throw new SerializationException("No audience provided");
+    public T deserializeWithDefault(ConfigurationNode node, FxDeserializationContext deserializationContext, FxSettings defaultSettings) throws SerializationException {
+        ConfigurationNode settingsNode = node.node("settings");
+        if(settingsNode.virtual()) {
+            if(defaultSettings == null) {
+                throw new SerializationException("No settings provided");
             }
-            return deserialize(node, defaultAudience);
+            return deserialize(node, deserializationContext, defaultSettings);
         }
-        return deserialize(node, FxAudienceSerializer.INSTANCE.deserialize(audienceNode));
+        return deserialize(node, deserializationContext, FxSettingsSerializer.INSTANCE.deserialize(settingsNode));
     }
 
-    public abstract T deserialize(ConfigurationNode node, FxAudience audience) throws SerializationException;
+    public abstract T deserialize(ConfigurationNode node, FxDeserializationContext deserializationContext, FxSettings settings) throws SerializationException;
 }

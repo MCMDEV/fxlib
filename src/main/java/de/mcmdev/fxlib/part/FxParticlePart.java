@@ -26,16 +26,17 @@
 package de.mcmdev.fxlib.part;
 
 import com.destroystokyo.paper.ParticleBuilder;
-import de.mcmdev.fxlib.audience.FxAudience;
+import de.mcmdev.fxlib.context.FxDeserializationContext;
+import de.mcmdev.fxlib.context.FxRuntimeContext;
+import de.mcmdev.fxlib.settings.FxSettings;
 import de.mcmdev.fxlib.serializer.FxPartSerializer;
 import de.mcmdev.fxlib.util.KeyedEnumUtil;
-import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 
-public class FxParticlePart extends FxPart {
+public class FxParticlePart extends PreparedFxPart {
 
     private final Particle particle;
     private final double offsetX;
@@ -47,7 +48,7 @@ public class FxParticlePart extends FxPart {
     private final int count;
     private final double extra;
 
-    public FxParticlePart(FxAudience audience, Particle particle, double offsetX, double offsetY, double offsetZ, double deltaX, double deltaY, double deltaZ, int count, double extra) {
+    public FxParticlePart(FxSettings audience, Particle particle, double offsetX, double offsetY, double offsetZ, double deltaX, double deltaY, double deltaZ, int count, double extra) {
         super(audience);
         this.particle = particle;
         this.deltaX = deltaX;
@@ -61,12 +62,12 @@ public class FxParticlePart extends FxPart {
     }
 
     @Override
-    protected void play(Player target, Location location) {
+    protected void play(Player target, FxRuntimeContext context, FxSettings settings) {
         new ParticleBuilder(particle)
                 .count(count)
                 .extra(extra)
                 .offset(deltaX, deltaY, deltaZ)
-                .location(location.clone().add(offsetX, offsetY, offsetZ))
+                .location(context.getLocation().clone().add(offsetX, offsetY, offsetZ))
                 .receivers(target)
                 .spawn();
     }
@@ -74,7 +75,7 @@ public class FxParticlePart extends FxPart {
     public static class Serializer extends FxPartSerializer<FxParticlePart> {
 
         @Override
-        public FxParticlePart deserialize(ConfigurationNode node, FxAudience audience) throws SerializationException {
+        public FxParticlePart deserialize(ConfigurationNode node, FxDeserializationContext deserializationContext, FxSettings settings) throws SerializationException {
             Particle particle = KeyedEnumUtil.fromKey(Particle.class, node.node("key").getString(), Particle.HAPPY_VILLAGER);
             double offsetX = node.node("offsetX").getDouble(0);
             double offsetY = node.node("offsetY").getDouble(0);
@@ -84,7 +85,7 @@ public class FxParticlePart extends FxPart {
             double deltaZ = node.node("deltaZ").getDouble(0);
             int count = node.node("count").getInt(1);
             double extra = node.node("extra").getDouble(0);
-            return new FxParticlePart(audience, particle, offsetX, offsetY, offsetZ, deltaX, deltaY, deltaZ, count, extra);
+            return new FxParticlePart(settings, particle, offsetX, offsetY, offsetZ, deltaX, deltaY, deltaZ, count, extra);
         }
     }
 }

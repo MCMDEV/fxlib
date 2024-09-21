@@ -25,20 +25,23 @@
 
 package de.mcmdev.fxlib.part;
 
-import de.mcmdev.fxlib.settings.FxSettings;
 import de.mcmdev.fxlib.context.FxRuntimeContext;
+import de.mcmdev.fxlib.settings.FxSettings;
+import org.bukkit.entity.Player;
 
-public abstract class FxPart {
-
-    private final FxSettings settings;
-
-    protected FxPart(FxSettings settings) {
-        this.settings = settings;
+public abstract class PreparedFxPart extends FxPart {
+    protected PreparedFxPart(FxSettings settings) {
+        super(settings);
     }
 
-    public void play(FxRuntimeContext context) {
-        play(context, settings);
+    @Override
+    protected void play(FxRuntimeContext context, FxSettings settings) {
+        if(settings.global())   {
+            context.getLocation().getNearbyPlayers(settings.radius()).forEach(player -> play(player, context, settings));
+        } else {
+            play(context.getPrimaryTarget(), context, settings);
+        }
     }
 
-    protected abstract void play(FxRuntimeContext context, FxSettings settings);
+    protected abstract void play(Player target, FxRuntimeContext context, FxSettings settings);
 }

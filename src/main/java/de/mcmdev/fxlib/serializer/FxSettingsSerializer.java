@@ -23,19 +23,20 @@
  *
  */
 
-package de.mcmdev.fxlib.audience;
+package de.mcmdev.fxlib.serializer;
 
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
+import de.mcmdev.fxlib.settings.FxSettings;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
 
-import java.util.Set;
+public class FxSettingsSerializer implements Serializer<FxSettings> {
 
-public record FxAudience(boolean global, int radius) {
+    public static FxSettingsSerializer INSTANCE = new FxSettingsSerializer();
 
-    public Set<Player> collect(Player primaryTarget, Location location) {
-        if (!global) {
-            return Set.of(primaryTarget);
-        }
-        return Set.copyOf(location.getNearbyPlayers(radius));
+    @Override
+    public FxSettings deserialize(ConfigurationNode node) throws SerializationException {
+        boolean global = node.node("global").getBoolean(true);
+        int radius = node.node("radius").getInt(0);
+        return new FxSettings(global, radius);
     }
 }

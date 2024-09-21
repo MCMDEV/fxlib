@@ -23,22 +23,30 @@
  *
  */
 
-package de.mcmdev.fxlib.part;
+package de.mcmdev.fxlib.context;
 
-import de.mcmdev.fxlib.settings.FxSettings;
-import de.mcmdev.fxlib.context.FxRuntimeContext;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 
-public abstract class FxPart {
+public class FxDeserializationContext {
 
-    private final FxSettings settings;
+    private final TagResolver tagResolver;
 
-    protected FxPart(FxSettings settings) {
-        this.settings = settings;
+    private FxDeserializationContext(TagResolver tagResolver) {
+        this.tagResolver = tagResolver;
     }
 
-    public void play(FxRuntimeContext context) {
-        play(context, settings);
+    public TagResolver getTagResolver() {
+        return tagResolver;
     }
 
-    protected abstract void play(FxRuntimeContext context, FxSettings settings);
+    public static FxDeserializationContext create(TagResolver tagResolver)  {
+        return new FxDeserializationContext(tagResolver);
+    }
+
+    public static FxDeserializationContext EMPTY = empty();
+
+    private static FxDeserializationContext empty() {
+        return create(TagResolver.empty());
+    }
+
 }

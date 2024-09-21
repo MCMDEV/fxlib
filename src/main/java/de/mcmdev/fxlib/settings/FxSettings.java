@@ -23,22 +23,8 @@
  *
  */
 
-package de.mcmdev.fxlib.part;
+package de.mcmdev.fxlib.settings;
 
-import de.mcmdev.fxlib.settings.FxSettings;
-import de.mcmdev.fxlib.context.FxRuntimeContext;
+public record FxSettings(boolean global, int radius) {
 
-public abstract class FxPart {
-
-    private final FxSettings settings;
-
-    protected FxPart(FxSettings settings) {
-        this.settings = settings;
-    }
-
-    public void play(FxRuntimeContext context) {
-        play(context, settings);
-    }
-
-    protected abstract void play(FxRuntimeContext context, FxSettings settings);
 }

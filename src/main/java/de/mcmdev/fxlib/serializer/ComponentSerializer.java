@@ -27,6 +27,7 @@ package de.mcmdev.fxlib.serializer;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 
@@ -42,9 +43,13 @@ public class ComponentSerializer implements Serializer<Component> {
 
     @Override
     public Component deserialize(ConfigurationNode node) throws SerializationException {
+        return deserialize(node, TagResolver.empty());
+    }
+
+    public Component deserialize(ConfigurationNode node, TagResolver tagResolver) throws SerializationException {
         String string = node.getString();
         if(string != null) {
-            return miniMessage.deserialize(string);
+            return miniMessage.deserialize(string, tagResolver);
         }
         return null;
     }

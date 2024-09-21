@@ -25,13 +25,13 @@
 
 package de.mcmdev.fxlib;
 
-import de.mcmdev.fxlib.audience.FxAudience;
+import de.mcmdev.fxlib.context.FxDeserializationContext;
+import de.mcmdev.fxlib.settings.FxSettings;
+import de.mcmdev.fxlib.context.FxRuntimeContext;
 import de.mcmdev.fxlib.part.FxPart;
 import de.mcmdev.fxlib.registry.FxRegistry;
-import de.mcmdev.fxlib.serializer.FxAudienceSerializer;
+import de.mcmdev.fxlib.serializer.FxSettingsSerializer;
 import de.mcmdev.fxlib.serializer.FxPartSerializer;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 
@@ -41,48 +41,52 @@ import java.util.List;
 
 public class FxEffect {
 
-    public static FxEffect EMPTY = new FxEffect(new FxAudience(false, 0), Collections.emptyList());
+    public static FxEffect EMPTY = new FxEffect(new FxSettings(false, 0), Collections.emptyList());
 
     public static FxEffect deserialize(ConfigurationNode node) throws SerializationException {
+        return deserialize(node, FxDeserializationContext.EMPTY);
+    }
+
+    public static FxEffect deserialize(ConfigurationNode node, FxDeserializationContext deserializationContext) throws SerializationException {
         List<FxPart> parts = new ArrayList<>();
         List<ConfigurationNode> childNodes = node.node("parts").getList(ConfigurationNode.class);
         if(childNodes == null) {
             return FxEffect.EMPTY;
         }
 
-        FxAudience defaultAudience = FxAudienceSerializer.INSTANCE.deserialize(node.node("audience"));
+        FxSettings defaultSettings = FxSettingsSerializer.INSTANCE.deserialize(node.node("settings"));
         for (ConfigurationNode childNode : childNodes) {
-            parts.add(deserializePart(childNode, defaultAudience));
+            parts.add(deserializePart(childNode, deserializationContext, defaultSettings));
         }
 
-        return new FxEffect(defaultAudience, parts);
+        return new FxEffect(defaultSettings, parts);
     }
 
-    private static FxPart deserializePart(ConfigurationNode childNode, FxAudience defaultAudience) throws SerializationException {
+    private static FxPart deserializePart(ConfigurationNode childNode, FxDeserializationContext deserializationContext, FxSettings defaultSettings) throws SerializationException {
         String string = childNode.node("type").getString();
         FxPartSerializer<?> serializer = FxRegistry.getSerializer(string);
         if (serializer == null) {
             throw new SerializationException("Unknown effect part type: " + string);
         }
-        return serializer.deserializeWithDefault(childNode, defaultAudience);
+        return serializer.deserializeWithDefault(childNode, deserializationContext, defaultSettings);
     }
 
-    private final FxAudience audience;
+    private final FxSettings settings;
     private final List<FxPart> parts;
 
-    public FxEffect(FxAudience audience, List<FxPart> parts) {
-        this.audience = audience;
+    public FxEffect(FxSettings settings, List<FxPart> parts) {
+        this.settings = settings;
         this.parts = parts;
     }
 
-    public void play(Player primaryTarget, Location location)   {
+    public void play(FxRuntimeContext context)   {
         for (FxPart part : parts) {
-            part.playAudience(primaryTarget, location);
+            part.play(context);
         }
     }
 
-    public FxAudience getAudience() {
-        return audience;
+    public FxSettings getSettings() {
+        return settings;
     }
 
     public List<FxPart> getParts() {

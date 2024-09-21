@@ -23,20 +23,30 @@
  *
  */
 
-package de.mcmdev.fxlib.serializer;
+package de.mcmdev.fxlib.context;
 
-import de.mcmdev.fxlib.audience.FxAudience;
-import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.serialize.SerializationException;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
-public class FxAudienceSerializer implements Serializer<FxAudience> {
+public class FxRuntimeContext {
 
-    public static FxAudienceSerializer INSTANCE = new FxAudienceSerializer();
+    private final Player primaryTarget;
+    private final Location location;
 
-    @Override
-    public FxAudience deserialize(ConfigurationNode node) throws SerializationException {
-        boolean global = node.node("global").getBoolean(true);
-        int radius = node.node("radius").getInt(0);
-        return new FxAudience(global, radius);
+    private FxRuntimeContext(Player primaryTarget, Location location) {
+        this.primaryTarget = primaryTarget;
+        this.location = location;
+    }
+
+    public static FxRuntimeContext create(Player primaryTarget, Location location) {
+        return new FxRuntimeContext(primaryTarget, location);
+    }
+
+    public Player getPrimaryTarget() {
+        return primaryTarget;
+    }
+
+    public Location getLocation() {
+        return location;
     }
 }
