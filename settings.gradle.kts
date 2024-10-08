@@ -6,3 +6,12 @@
  */
 
 rootProject.name = "fxlib"
+
+include("api-common")
+include("api-paper")
+include("model")
+include("plugin-paper")
+include("reader-common")
+include("reader-jackson")
+include("runtime-common")
+include("runtime-paper")
